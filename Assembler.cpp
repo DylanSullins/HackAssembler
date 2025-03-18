@@ -68,18 +68,16 @@ std::unordered_map<std::string, std::string> LabelTable = {
     {"KBD",    "0110000000000000"},
 };
 
-
-std::vector<char> digitChars = {'0','1','2','3','4','5','6','7','8','9'};
-
 std::string RemoveWhiteSpaceAndComments(std::string line)
 {
     int firstChar = line.find_first_not_of(" \n\r\t");
     int lastChar = line.find_last_not_of(" \n\r\t");
     if (firstChar == -1 || lastChar == -1) return "";
-    int commentStart = line.find("//");
-    std::string trimmedLine = line.substr(firstChar, lastChar + 1);
+    std::string trimmedLine = line.substr(firstChar, lastChar - firstChar + 1);
+    int commentStart = trimmedLine.find("//");
     std::string decommentedLine;
     if (commentStart == -1) decommentedLine = trimmedLine;
+    else if (commentStart == 0) decommentedLine = "";
     else decommentedLine = trimmedLine.substr(0, commentStart);
     return decommentedLine;
 }
@@ -98,7 +96,6 @@ void FirstPass(std::ifstream& fin, int& lineNum)
             int rightParenPos = line.find(")");
             std::string label = line.substr(1, rightParenPos - 1);
             LabelTable[label] = std::bitset<16>(--lineNum).to_string();
-            std::cout << "  ---> Label: " << label << " at line " << lineNum << " or " << LabelTable[label] << std::endl;
         }
     }
 }
@@ -170,7 +167,7 @@ std::string ConvertLineToBinary(std::string line, int& lineNum, int& nextVarAddr
 void ProcessLine(std::string line, int& lineNum, int& nextVarAddr, std::ofstream& fout)
 {
     line = RemoveWhiteSpaceAndComments(line);
-    if (line == "")
+    if (line == "" || line[0] == ' ')
     {
         --lineNum;
         return;
