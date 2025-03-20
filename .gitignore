@@ -1,4 +1,2 @@
 *.exe
-asm*
-hack*
-vm*
+InFiles*
